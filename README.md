@@ -1,4 +1,4 @@
-# belugaMVC
+# beluga
 
 ##### Calendarizacion
 
