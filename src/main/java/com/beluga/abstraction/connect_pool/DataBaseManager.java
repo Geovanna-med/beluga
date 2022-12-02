@@ -1,5 +1,11 @@
 package com.beluga.abstraction.connect_pool;
 
+import java.io.Console;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 public class DataBaseManager {
 
     private static DataBaseManager instance = null;
@@ -15,7 +21,6 @@ public class DataBaseManager {
         for (int i = 0; i < dataBasesInfo.length; i++) {
             dataBases[i] = creaDataBase(dataBasesInfo[i]);
         }
-
     }
 
     public static DataBaseManager getInstance() {
@@ -39,6 +44,7 @@ public class DataBaseManager {
         db.setMinConnection((int) dataBaseInfo[6]);
         db.setMaxConnection((int) dataBaseInfo[7]);
         db.setMaxTotalConnection((int) dataBaseInfo[8]);
+        db.setUpConnectionPool();
 
         return db;
     }
@@ -52,6 +58,65 @@ public class DataBaseManager {
         return null;
     }
 
+
+    public static void main(String[] args) {
+        DataBaseManager dbManager = DataBaseManager.getInstance();
+        DataBase db = dbManager.getDataBase("db1");
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        System.out.println("Using db: " + db.getName());
+        try {
+            connection = db.getConnection();
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("select * from movies");
+            while (resultSet.next()) {
+                System.out.println("title:" + resultSet.getString("title"));
+                System.out.println("genre:" + resultSet.getString("genre"));
+                System.out.println("director:" + resultSet.getString("director"));
+            }
+
+            if (resultSet != null ) resultSet.close();
+            if (statement != null) statement.close();
+            if (connection != null)
+                connection.close();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Done");
+
+
+        DataBase db2 = dbManager.getDataBase("db2");
+        
+        System.out.println("Using db: " + db2.getName());
+        try {
+            connection = db2.getConnection();
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery("select * from series");
+            while (resultSet.next()) {
+                System.out.println("title:" + resultSet.getString("title"));
+                System.out.println("caps:" + resultSet.getInt("caps"));
+                System.out.println("genre:" + resultSet.getString("genre"));
+            }
+
+            if (resultSet != null)
+                resultSet.close();
+            if (statement != null)
+                statement.close();
+            if (connection != null)
+                connection.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Done");
+
+
+
+    }
 
 
 }

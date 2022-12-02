@@ -9,7 +9,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class ConfigReader {
-    private String pathFile = "com/beluga/config/db.json";
+    private String pathFile = "/home/teo/Desktop/workspace/beluga/src/main/java/com/beluga/config/db.json";
 
     private Object[] parseDbObject(JSONObject db) {
         return new Object[] {
@@ -19,9 +19,9 @@ public class ConfigReader {
                 db.get("user"),
                 db.get("password"),
                 db.get("database"),
-                db.get("minConnection"),
-                db.get("maxConnection"),
-                db.get("maxTotalConnection")
+                ((Long)db.get("min_connections")).intValue(),
+                ((Long)db.get("max_connections")).intValue(),
+                ((Long)db.get("max_total_connections")).intValue()
         };
     }
 

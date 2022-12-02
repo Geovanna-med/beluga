@@ -20,7 +20,7 @@ public class DataBase {
     private String port;
     private String user;
     private String password;
-    private String database;
+    private String dbName;
 
     // connection pool config
     private int minConnection;
@@ -29,13 +29,13 @@ public class DataBase {
     private PoolingDataSource dataSource = null;
     private GenericObjectPoolConfig<PoolableConnection> config = new GenericObjectPoolConfig<>();
 
-    public DataBase(String name, String host, String port, String user, String password, String database) {
+    public DataBase(String name, String host, String port, String user, String password, String dbName) {
         this.name = name;
         this.host = host;
         this.port = port;
         this.user = user;
         this.password = password;
-        this.database = database;
+        this.dbName = dbName;
     }
     
     public void setMinConnection(int minConnection) {
@@ -70,8 +70,10 @@ public class DataBase {
         properties.setProperty("password", this.password);
 
         ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(
-            "jdbc:mysql://" + host + ":" + port + "/" + database, 
-            properties);
+                "jdbc:mariadb://" + host + ":" + port + "/"
+                        + dbName,
+                properties
+            );
 
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
 
