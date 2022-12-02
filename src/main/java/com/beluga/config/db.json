@@ -1,0 +1,26 @@
+{
+	"dbs": [
+		{
+			"name": "db1",
+			"user": "root",
+			"password": "secret276",
+			"host": "localhost",
+			"port": "3306",
+			"database": "movies",
+			"min_connections": 1,
+			"max_connections": 10,
+			"max_total_connections": 100
+		},
+		{
+			"name": "db2",
+			"user": "root",
+			"password": "secret276",
+			"host": "localhost",
+			"port": "3306",
+			"database": "series",
+			"min_connections": 1,
+			"max_connections": 10,
+			"max_total_connections": 100
+		}
+	]
+}
