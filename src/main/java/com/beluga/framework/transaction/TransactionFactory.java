@@ -9,7 +9,7 @@ import com.beluga.framework.mvc.Model;
 public class TransactionFactory {
 
     public static Transaction createTransacation(String name, Controller controller, Model model, String functionName) throws NonExistentModelFunctionException{
-
+        System.out.println(name);
         Method transacationMethod = getModelMethod(model, functionName);
         return new Transaction(name, controller, model, transacationMethod);
 
