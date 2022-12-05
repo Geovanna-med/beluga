@@ -40,20 +40,26 @@ public class DataBase {
     
     public void setMinConnection(int minConnection) {
         this.minConnection = minConnection;
+        config.setMinIdle(this.minConnection);
     }
 
     public void setMaxConnection(int maxConnection) {
         this.maxConnection = maxConnection;
+        config.setMaxIdle(this.maxConnection);
     }
 
     public void setMaxTotalConnection(int maxTotalConnection) {
         this.maxTotalConnection = maxTotalConnection;
+        config.setMaxTotal(this.maxTotalConnection);
     }
 
     public Object getName() {
         return this.name;
     }
 
+    /*
+     * Wrapper method to get a connection from the connection pool.
+     */
     public Connection getConnection() {
         Connection connection = null;
         try {
@@ -64,6 +70,28 @@ public class DataBase {
         return connection;
     }
 
+
+    public void updateConnectionPool() {
+        // create connection pool
+        // ObjectPool<PoolableConnection> connectionPool = new GenericObjectPool<>(null, config);
+
+        // // create connection factory
+        // ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(
+        //         "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.dbName + "?useSSL=false", this.user,
+        //         this.password);
+
+        // // create poolable connection factory
+        // PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory,
+        //         connectionPool, null);
+
+        // // create pooling data source
+        // dataSource = new PoolingDataSource<>(connectionPool);
+    }
+
+    /*
+     * This method is used to set up the connection pool for the current database
+     * @see https://commons.apache.org/proper/commons-dbcp/configuration.html
+     */
     public void setUpConnectionPool() {
         Properties properties = new Properties();
         properties.setProperty("user", this.user);
@@ -72,16 +100,15 @@ public class DataBase {
         ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(
                 "jdbc:mariadb://" + host + ":" + port + "/"
                         + dbName,
-                properties
-            );
+                properties);
 
         PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
 
-        config.setMaxTotal(this.maxTotalConnection);
-        config.setMaxIdle(this.maxConnection);
-        config.setMinIdle(this.minConnection);
+        ObjectPool<PoolableConnection> connectionPool = new GenericObjectPool<>(
+                poolableConnectionFactory, this.config);
 
-        ObjectPool<PoolableConnection> connectionPool = new GenericObjectPool<>(poolableConnectionFactory, config);
+        
+
         poolableConnectionFactory.setPool(connectionPool);
 
         this.dataSource = new PoolingDataSource<PoolableConnection>(connectionPool);

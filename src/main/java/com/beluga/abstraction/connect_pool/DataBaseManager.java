@@ -1,18 +1,26 @@
 package com.beluga.abstraction.connect_pool;
 
-import java.io.Console;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
+/*
+ * This class is used to manage the creation of the DataBase's and its 
+ * connection pools. The manager will store each database defined in 
+ * the configuration file and will return the requested database by its name.
+ * 
+ * @see src/main/java/com/beluga/config/db.json
+ * 
+ * The Manager is a syncronized singleton since it should be thread safe, allowing
+ * the developer to create a single instance of the manager and use it to get the
+ * whole application.
+ * 
+ */
 public class DataBaseManager {
-
     private static DataBaseManager instance = null;
     private DataBase[] dataBases;
     private ConfigReader configReader;
     
-
+    /*
+     * When the manager is created, it will read the configuration file and
+     * create the databases and therefore its connection pools. 
+     */
     private DataBaseManager() {
         configReader = new ConfigReader();
         Object[][] dataBasesInfo = configReader.readDataBasesConfig();
@@ -23,14 +31,21 @@ public class DataBaseManager {
         }
     }
 
-    public static DataBaseManager getInstance() {
+    public static synchronized DataBaseManager getInstance() {
         if (instance == null) {
             instance = new DataBaseManager();
         }
         return instance;
     }
 
-
+    /*
+     * @param dataBaseInfo: Object[] with the following structure:
+     *          { 
+     *              name, host, port, user, password, database, min_connections, max_connections, max_total_connections 
+     *          }
+     * 
+     * @return DataBase with the information provided in the dataBaseInfo parameter.
+     */
     private DataBase creaDataBase(Object[] dataBaseInfo) {
         DataBase db = new DataBase(
                 (String) dataBaseInfo[0],
@@ -49,6 +64,11 @@ public class DataBaseManager {
         return db;
     }
 
+    /*
+     * @param name: name of the database to be returned
+     * 
+     * @return DataBase with the given name
+     */
     public DataBase getDataBase(String name) {
         for (DataBase dataBase : dataBases) {
             if (dataBase.getName().equals(name)) {
@@ -57,66 +77,5 @@ public class DataBaseManager {
         }
         return null;
     }
-
-
-    public static void main(String[] args) {
-        DataBaseManager dbManager = DataBaseManager.getInstance();
-        DataBase db = dbManager.getDataBase("db1");
-
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet resultSet = null;
-
-        System.out.println("Using db: " + db.getName());
-        try {
-            connection = db.getConnection();
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("select * from movies");
-            while (resultSet.next()) {
-                System.out.println("title:" + resultSet.getString("title"));
-                System.out.println("genre:" + resultSet.getString("genre"));
-                System.out.println("director:" + resultSet.getString("director"));
-            }
-
-            if (resultSet != null ) resultSet.close();
-            if (statement != null) statement.close();
-            if (connection != null)
-                connection.close();
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Done");
-
-
-        DataBase db2 = dbManager.getDataBase("db2");
-        
-        System.out.println("Using db: " + db2.getName());
-        try {
-            connection = db2.getConnection();
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("select * from series");
-            while (resultSet.next()) {
-                System.out.println("title:" + resultSet.getString("title"));
-                System.out.println("caps:" + resultSet.getInt("caps"));
-                System.out.println("genre:" + resultSet.getString("genre"));
-            }
-
-            if (resultSet != null)
-                resultSet.close();
-            if (statement != null)
-                statement.close();
-            if (connection != null)
-                connection.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Done");
-
-
-
-    }
-
 
 }
