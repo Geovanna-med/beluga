@@ -18,11 +18,9 @@ public class ConfigReader {
     private Object[] parseDbObject(JSONObject db) {
         return new Object[] {
                 db.get("name"),
-                db.get("host"),
-                db.get("port"),
                 db.get("user"),
                 db.get("password"),
-                db.get("database"),
+                db.get("url"),
                 ((Long) db.get("min_connections")).intValue(),
                 ((Long) db.get("max_connections")).intValue(),
                 ((Long) db.get("max_total_connections")).intValue()

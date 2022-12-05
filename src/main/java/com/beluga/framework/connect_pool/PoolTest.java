@@ -1,4 +1,4 @@
-package com.beluga.abstraction.connect_pool;
+package com.beluga.framework.connect_pool;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -38,9 +38,9 @@ class Thread_UsingConnectionPool extends Thread {
                 if (stmt != null) {
                     stmt.close();
                 }
-                // if (conn != null) {
-                //     conn.close();
-                // }
+                if (conn != null) {
+                    conn.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }

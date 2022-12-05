@@ -1,5 +1,17 @@
 package com.beluga.framework.connect_pool;
 
+import java.io.File;
+import java.util.EventListener;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.configuration2.FileBasedConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.ConfigurationBuilderEvent;
+import org.apache.commons.configuration2.builder.ReloadingFileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.event.Event;
+import org.apache.commons.configuration2.reloading.PeriodicReloadingTrigger;
+
 /*
  * This class is used to manage the creation of the DataBase's and its 
  * connection pools. The manager will store each database defined in 
@@ -51,14 +63,12 @@ public class DataBaseManager {
                 (String) dataBaseInfo[0],
                 (String) dataBaseInfo[1],
                 (String) dataBaseInfo[2],
-                (String) dataBaseInfo[3],
-                (String) dataBaseInfo[4],
-                (String) dataBaseInfo[5]
+                (String) dataBaseInfo[3]
         );
 
-        db.setMinConnection((int) dataBaseInfo[6]);
-        db.setMaxConnection((int) dataBaseInfo[7]);
-        db.setMaxTotalConnection((int) dataBaseInfo[8]);
+        db.setMinConnection((int) dataBaseInfo[4]);
+        db.setMaxConnection((int) dataBaseInfo[5]);
+        db.setMaxTotalConnection((int) dataBaseInfo[6]);
         db.setUpConnectionPool();
 
         return db;
@@ -76,6 +86,29 @@ public class DataBaseManager {
             }
         }
         return null;
+    }
+
+    public void watchConfig() {
+        Parameters params = new Parameters();
+        // Read data from this file
+        File propertiesFile = new File("config.properties");
+
+        ReloadingFileBasedConfigurationBuilder<FileBasedConfiguration> configBuilder = new ReloadingFileBasedConfigurationBuilder<FileBasedConfiguration>(
+                PropertiesConfiguration.class)
+                .configure(params.fileBased()
+                        .setFile(propertiesFile));
+        PeriodicReloadingTrigger reloadTrg = new PeriodicReloadingTrigger(configBuilder.getReloadingController(), null,
+                5, TimeUnit.SECONDS);
+
+            configBuilder.addEventListener(ConfigurationBuilderEvent.CONFIGURATION_REQUEST,
+                new EventListener() {
+                    @Override
+                    public void onEvent(Event event) {
+                            configBuilder.getReloadingController().checkForReloading(null);
+                    }
+                });
+        reloadTrg.start();
+
     }
 
 }
