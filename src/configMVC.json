@@ -1,0 +1,17 @@
+{
+    "components": [
+        {
+            "model": "com.beluga.impl.urnaVirtual.UrnaVirtual",
+            "view": "com.beluga.impl.urnaVirtual.UrnaVirtualView",
+            "controller": "com.beluga.impl.urnaVirtual.UrnaVirtualController",
+            "transactions": [
+                {
+                    "name": "addVoto",
+                    "modelFunction": "addVotoToCandidatoWithNombre"
+                }
+            ],
+            "exclude_log": false
+        }
+    ],
+    "logs": true
+}

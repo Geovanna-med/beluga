@@ -18,8 +18,8 @@ public class UrnaVirtualController extends Controller{
     protected void addVoto(String candidato) {
         //This transaction shoudl be managed by the transaction handler
         this.data = candidato;
-        TransactionHandler.getInstance().executeTransaction("añadirVoto");
-        System.out.println("Called transaction to be executed: " + "añadirVoto");
+        TransactionHandler.getInstance().executeTransaction("addVoto");
+        System.out.println("Called transaction to be executed: " + "addVoto");
         //((UrnaVirtual) model).addVotoToCandidatoWithNombre(candidato);
     }
 
