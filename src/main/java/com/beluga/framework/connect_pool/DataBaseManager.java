@@ -70,11 +70,12 @@ public class DataBaseManager implements ConfigSubscriptable {
                 (String) dataBaseInfo[0],
                 (String) dataBaseInfo[1],
                 (String) dataBaseInfo[2],
-                (String) dataBaseInfo[3]);
+                (String) dataBaseInfo[3],
+                (int) dataBaseInfo[4],
+                (int) dataBaseInfo[5],
+                (int) dataBaseInfo[6]
+                );
 
-        db.setMinConnection((int) dataBaseInfo[4]);
-        db.setMaxConnection((int) dataBaseInfo[5]);
-        db.setMaxTotalConnection((int) dataBaseInfo[6]);
         db.setUpConnectionPool();
 
         return db;
@@ -100,6 +101,7 @@ public class DataBaseManager implements ConfigSubscriptable {
      */
     @Override
     public void reload() throws ConnectionPoolException, IOException, ParseException {
+        System.out.println("Reloading config file...");
         Object[][] newDataBasesInfo = configReader.readDataBasesConfig();
 
         for (int i = 0; i < dataBases.length; i++) {

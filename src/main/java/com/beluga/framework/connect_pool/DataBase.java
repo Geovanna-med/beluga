@@ -8,6 +8,7 @@ import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
 import org.apache.commons.dbcp2.PoolableConnection;
 import org.apache.commons.dbcp2.PoolableConnectionFactory;
 import org.apache.commons.dbcp2.PoolingDataSource;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -34,20 +35,40 @@ public class DataBase {
     private ObjectPool<PoolableConnection> connectionPool;
     private GenericObjectPoolConfig<PoolableConnection> config = new GenericObjectPoolConfig<>();
 
-    public DataBase(String name, String user, String password, String url) {
+    
+
+    public DataBase(String name, String user, String password, String url, int minConnection, int maxConnection,
+            int maxTotalConnection) throws ConnectionPoolException {
         this.name = name;
         this.user = user;
         this.password = password;
         this.url = url;
+        validateConfigs(minConnection, maxConnection, maxTotalConnection);
     }
     
+
+    private void validateConfigs(int min_connections, int max_connections, int max_total_connections) throws ConnectionPoolException {
+        if (min_connections < 1 || min_connections > max_connections) {
+            throw new ConnectionPoolException("minConnection must be greater than 0 and less-equal than maxConnection");
+        }
+        
+        if (max_connections < 1 || max_connections > max_total_connections) {
+            throw new ConnectionPoolException(
+                    "maxConnection must be greater than 0 and less-equal than maxTotalConnection");
+        }
+        
+        if (max_total_connections < 1) {
+            throw new ConnectionPoolException("maxTotalConnection must be greater than 0 and greater-equal than minConnection");
+        }
+    }
+
     public void setMinConnection(int minConnection) throws ConnectionPoolException {
         if (minConnection == this.minConnection) {
             return;
         }
         
         if (minConnection < 1 || minConnection > this.maxConnection) {
-            throw new ConnectionPoolException("minConnection must be greater than 1 and less than maxConnection");
+            throw new ConnectionPoolException("minConnection must be greater than 0 and less-equal than maxConnection");
         }
 
         this.minConnection = minConnection;
@@ -59,8 +80,8 @@ public class DataBase {
             return;
         }
         
-        if (maxConnection < 1 || maxConnection > this.maxTotalConnection) {
-            throw new ConnectionPoolException("maxConnection must be greater than 1 and less than maxTotalConnection");
+        if (maxConnection < 1 || maxConnection >= this.maxTotalConnection) {
+            throw new ConnectionPoolException("maxConnection must be greater than 0 and less-equal than maxTotalConnection");
         }
 
         this.maxConnection = maxConnection;
@@ -73,7 +94,7 @@ public class DataBase {
         }
         
         if (maxTotalConnection < 1 || maxTotalConnection < this.minConnection) {
-            throw new ConnectionPoolException("maxTotalConnection must be greater than 1 and greater than minConnection");
+            throw new ConnectionPoolException("maxTotalConnection must be greater than 0 and greater-equal than minConnection");
         }
 
         this.maxTotalConnection = maxTotalConnection;

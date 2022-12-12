@@ -49,7 +49,7 @@ class Thread_UsingConnectionPool extends Thread {
                     stmt.close();
                 }
                 if (conn != null) {
-                    //(conn.close();
+                    //conn.close();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -68,13 +68,20 @@ public class PoolTest {
         DataBaseManager dbManager = DataBaseManager.getInstance();
         DataBase db = dbManager.getDataBase("db1");
 
-        Thread.sleep(5000);
-
+        
         Thread thread1 = new Thread_UsingConnectionPool(db, 0);
         Thread thread2 = new Thread_UsingConnectionPool(db, 1);
-
+        Thread thread3 = new Thread_UsingConnectionPool(db, 2);
+        Thread thread4 = new Thread_UsingConnectionPool(db, 3);
+        
         thread1.start();
         thread2.start();
+        
+        Thread.sleep(7000);
+
+        thread3.start();
+        thread4.start();
+
     
         while (true) {
             System.out.println("sleeping!");
