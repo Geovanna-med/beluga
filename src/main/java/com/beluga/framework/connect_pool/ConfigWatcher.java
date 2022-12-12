@@ -9,12 +9,10 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
-import org.apache.log4j.Logger;
-
 import org.json.simple.parser.ParseException;
 
 import com.beluga.framework.exceptions.connectionpoolexceptions.ConnectionPoolException;
-
+import java.util.logging.Logger;
 /*
  * This class is used to watch the configuration file changes. And
  * notify the subscribers. 
@@ -24,7 +22,7 @@ public class ConfigWatcher extends Thread {
     private final String CONFIG_FILE;
     private ConfigSubscriptable subscriptor;
 
-    static Logger logger = Logger.getLogger(ConfigWatcher.class);
+    Logger logger = Logger.getLogger("com");
 
     public ConfigWatcher(ConfigSubscriptable subscriptor, String configPath, String configName) {
         this.CONFIG_PATH = configPath;
@@ -37,7 +35,7 @@ public class ConfigWatcher extends Thread {
         try {
             this.watchConfig();
         } catch (InterruptedException | ConnectionPoolException | ParseException e) {
-            logger.trace(e.getMessage());
+            logger.log(java.util.logging.Level.SEVERE, e.getMessage());
         }
     }
 
@@ -53,17 +51,17 @@ public class ConfigWatcher extends Thread {
 
                 final Path changed = (Path) event.context();
 
-                logger.trace(changed);
+                logger.log(java.util.logging.Level.INFO, "File changed: " + changed);
                 if (changed.endsWith(CONFIG_FILE)) {
                     this.subscriptor.reload();
-                    logger.trace("Configuration file changed.");
+                    logger.log(java.util.logging.Level.INFO, "Configuration file changed.");
                 }
 
             }
             // reset the key
             boolean valid = wk.reset();
             if (!valid) {
-                logger.trace("Key for configFile has been unregistered");
+                logger.log(java.util.logging.Level.INFO, "Key for configFile has been unregistered");
             }
         }
     }
@@ -83,7 +81,7 @@ public class ConfigWatcher extends Thread {
             receiveFileEvent(watchService);
 
         } catch (IOException e) {
-            logger.trace(e.getMessage());
+           logger.log(java.util.logging.Level.SEVERE, e.getMessage());
         }
     }
 }
