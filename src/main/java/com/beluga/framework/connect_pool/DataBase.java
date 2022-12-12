@@ -12,6 +12,8 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
+import com.beluga.framework.exceptions.connectionpoolexceptions.ConnectionPoolException;
+
 public class DataBase {
 
     // database connection config
@@ -24,7 +26,12 @@ public class DataBase {
     private int minConnection;
     private int maxConnection;
     private int maxTotalConnection;
-    private PoolingDataSource dataSource = null;
+
+    // connection pool
+    private PoolingDataSource dataSource;
+    private ConnectionFactory connectionFactory;
+    private PoolableConnectionFactory poolableConnectionFactory;
+    private ObjectPool<PoolableConnection> connectionPool;
     private GenericObjectPoolConfig<PoolableConnection> config = new GenericObjectPoolConfig<>();
 
     public DataBase(String name, String user, String password, String url) {
@@ -34,17 +41,41 @@ public class DataBase {
         this.url = url;
     }
     
-    public void setMinConnection(int minConnection) {
+    public void setMinConnection(int minConnection) throws ConnectionPoolException {
+        if (minConnection == this.minConnection) {
+            return;
+        }
+        
+        if (minConnection < 1 || minConnection > this.maxConnection) {
+            throw new ConnectionPoolException("minConnection must be greater than 1 and less than maxConnection");
+        }
+
         this.minConnection = minConnection;
         config.setMinIdle(this.minConnection);
     }
 
-    public void setMaxConnection(int maxConnection) {
+    public void setMaxConnection(int maxConnection) throws ConnectionPoolException {
+        if (maxConnection == this.maxConnection) {
+            return;
+        }
+        
+        if (maxConnection < 1 || maxConnection > this.maxTotalConnection) {
+            throw new ConnectionPoolException("maxConnection must be greater than 1 and less than maxTotalConnection");
+        }
+
         this.maxConnection = maxConnection;
         config.setMaxIdle(this.maxConnection);
     }
 
-    public void setMaxTotalConnection(int maxTotalConnection) {
+    public void setMaxTotalConnection(int maxTotalConnection) throws ConnectionPoolException {
+        if (maxTotalConnection == this.maxTotalConnection) {
+            return;
+        }
+        
+        if (maxTotalConnection < 1 || maxTotalConnection < this.minConnection) {
+            throw new ConnectionPoolException("maxTotalConnection must be greater than 1 and greater than minConnection");
+        }
+
         this.maxTotalConnection = maxTotalConnection;
         config.setMaxTotal(this.maxTotalConnection);
     }
@@ -68,20 +99,14 @@ public class DataBase {
 
 
     public void updateConnectionPool() {
-        // create connection pool
-        // ObjectPool<PoolableConnection> connectionPool = new GenericObjectPool<>(null, config);
-
-        // // create connection factory
-        // ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(
-        //         "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.dbName + "?useSSL=false", this.user,
-        //         this.password);
-
-        // // create poolable connection factory
-        // PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory,
-        //         connectionPool, null);
-
-        // // create pooling data source
-        // dataSource = new PoolingDataSource<>(connectionPool);
+        try {
+            // create connection pool
+            connectionPool = new GenericObjectPool<>(poolableConnectionFactory, config);
+            poolableConnectionFactory.setPool(connectionPool);
+            dataSource = new PoolingDataSource<>(connectionPool);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -93,16 +118,14 @@ public class DataBase {
         properties.setProperty("user", this.user);
         properties.setProperty("password", this.password);
 
-        ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(
+        connectionFactory = new DriverManagerConnectionFactory(
                 this.url,
                 properties);
 
-        PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
+        poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
 
-        ObjectPool<PoolableConnection> connectionPool = new GenericObjectPool<>(
+        connectionPool = new GenericObjectPool<>(
                 poolableConnectionFactory, this.config);
-
-        
 
         poolableConnectionFactory.setPool(connectionPool);
 

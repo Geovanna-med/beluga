@@ -5,18 +5,9 @@
 			"user": "root",
 			"password": "secret276",
 			"url": "jdbc:mariadb://localhost:3306/movies",
-			"min_connections": 1,
-			"max_connections": 1,
+			"min_connections": 2,
+			"max_connections": 3,
 			"max_total_connections": 1
-		},
-		{
-			"name": "db2",
-			"user": "root",
-			"password": "secret276",
-			"url": "jdbc:mariadb://localhost:3306/movies",
-			"min_connections": 1,
-			"max_connections": 10,
-			"max_total_connections": 100
 		}
 	]
 }

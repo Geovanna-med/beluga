@@ -4,6 +4,8 @@ package com.beluga.framework.exceptions.connectionpoolexceptions;
 /**
  * InnerConnectionPoolException
  */
-public abstract class ConnectionPoolException {
-
+public class ConnectionPoolException extends Exception{
+    public ConnectionPoolException(String message) {
+        super(message);
+    }
 }
